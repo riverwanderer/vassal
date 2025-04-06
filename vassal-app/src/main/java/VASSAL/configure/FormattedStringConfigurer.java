@@ -33,127 +33,147 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
-public class FormattedStringConfigurer
-        extends StringConfigurer
-        implements ActionListener, FocusListener {
+public class FormattedStringConfigurer extends StringConfigurer implements ActionListener, FocusListener {
+    private static final long serialVersionUID = 1L;
 
-  private final DefaultComboBoxModel<String> optionsModel;
-  private JComboBox<String> dropList;
-  private boolean processingSelection = false;
+    private final transient DefaultComboBoxModel<String> optionsModel;
+    private transient JComboBox<String> dropList;
+    private transient boolean processingSelection;
 
-  public FormattedStringConfigurer(String key, String name) {
-    this(key, name, new String[0]);
-  }
-
-  public FormattedStringConfigurer(String[] options) {
-    this(null, "", options);
-  }
-
-  public FormattedStringConfigurer(String key, String name, String[] options) {
-    super(key, name);
-    optionsModel = new DefaultComboBoxModel<>();
-    setOptions(options);
-  }
-
-  public void setOptions(String[] options) {
-    optionsModel.removeAllElements();
-    optionsModel.addElement(Resources.getString("Editor.FormattedStringConfigurer.insert"));
-    for (final String option : options) {
-      optionsModel.addElement(option);
+    public FormattedStringConfigurer(String key, String name) {
+        this(key, name, new String[0]);
     }
-    setListVisibility();
-  }
 
-  public String[] getOptions() {
-    final String[] s = new String[optionsModel.getSize()];
-    for (int i = 0; i < s.length; ++i) {
-      s[i] = optionsModel.getElementAt(i);
+    public FormattedStringConfigurer(String[] options) {
+        this(null, "", options);
     }
-    return s;
-  }
 
-  @Override
-  public Component getControls() {
-    if (p == null) {
-      super.getControls();
-
-      nameField.addFocusListener(this);
-
-      dropList = new JComboBox<>(optionsModel) {
-        @Override
-        public void setPopupVisible(boolean visible) {
-          if (!processingSelection) {
-            super.setPopupVisible(visible);
-          }
-        }
-      };
-      dropList.setSelectedIndex(0);
-      dropList.setEnabled(false);
-      dropList.addActionListener(this);
-
-      setListVisibility();
-      p.add(dropList, "grow 0,right"); // NON-NLS
-    }
-    return p;
-  }
-
-  private void setListVisibility() {
-    if (dropList != null) {
-      dropList.setVisible(optionsModel.getSize() > 1);
-    }
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    if (dropList.isPopupVisible()) {
-      processingSelection = true;
-      try {
-        final int selectedIndex = dropList.getSelectedIndex();
-        if (selectedIndex > 0) {
-          final String item = "$" + optionsModel.getElementAt(selectedIndex) + "$";
-
-          // Get current selection/caret info before any focus changes
-          final JTextComponent textComp = nameField;
-          final int start = textComp.getSelectionStart();
-          final int end = textComp.getSelectionEnd();
-          final String text = textComp.getText();
-
-          // Insert the new text
-          final String newText = text.substring(0, start) + item + text.substring(end);
-          textComp.setText(newText);
-
-          // Position caret after inserted text
-          textComp.setCaretPosition(start + item.length());
-
-          // Update value without triggering recursive updates
-          noUpdate = true;
-          setValue(newText);
-          noUpdate = false;
-        }
-      }
-      finally {
+    public FormattedStringConfigurer(String key, String name, String[] options) {
+        super(key, name);
+        optionsModel = new DefaultComboBoxModel<>();
         processingSelection = false;
-        dropList.setSelectedIndex(0);
-      }
-
-      // Return focus without triggering full selection
-      nameField.requestFocusInWindow();
-      nameField.setCaretPosition(nameField.getCaretPosition());
+        setOptions(options);
     }
-  }
 
-  @Override
-  public void focusGained(FocusEvent e) {
-    if (dropList != null) {
-      dropList.setSelectedIndex(0);
-      dropList.setEnabled(true);
+    /**
+     * Set the list of options available for insertion
+     * @param options array of options
+     */
+    public void setOptions(String[] options) {
+        optionsModel.removeAllElements();
+        optionsModel.addElement(Resources.getString("Editor.FormattedStringConfigurer.insert"));
+        if (options != null) {
+            for (String option : options) {
+                if (option != null) {
+                    optionsModel.addElement(option);
+                }
+            }
+        }
+        setListVisibility();
     }
-  }
 
-  @Override
-  public void focusLost(FocusEvent e) {
-    if (dropList != null && !dropList.isFocusOwner() && !processingSelection) {
-      dropList.setEnabled(false);
+    /**
+     * @return the current list of options (excluding the initial "insert" prompt)
+     */
+    public String[] getOptions() {
+        String[] s = new String[optionsModel.getSize() - 1]; // Exclude "insert" prompt
+        for (int i = 0; i < s.length; i++) {
+            s[i] = optionsModel.getElementAt(i + 1);
+        }
+        return s;
     }
-  }
+
+    @Override
+    public Component getControls() {
+        if (p == null) {
+            super.getControls();
+
+            nameField.addFocusListener(this);
+            
+            dropList = new JComboBox<String>(optionsModel) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void setPopupVisible(boolean visible) {
+                    if (!processingSelection) {
+                        super.setPopupVisible(visible);
+                    }
+                }
+            };
+            dropList.setSelectedIndex(0);
+            dropList.setEnabled(false);
+            dropList.addActionListener(this);
+
+            setListVisibility();
+            p.add(dropList, "grow 0,right"); // NON-NLS
+        }
+        return p;
+    }
+
+    /**
+     * Show the dropdown list only when there are options to select
+     */
+    private void setListVisibility() {
+        if (dropList != null) {
+            dropList.setVisible(optionsModel.getSize() > 1);
+        }
+    }
+
+    /*
+     * Drop-down list has been clicked, insert selected option onto string
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == dropList && dropList.isPopupVisible()) {
+            processingSelection = true;
+            try {
+                int selectedIndex = dropList.getSelectedIndex();
+                if (selectedIndex > 0) {
+                    String item = "$" + optionsModel.getElementAt(selectedIndex) + "$";
+                    
+                    JTextComponent textComp = nameField;
+                    int start = textComp.getSelectionStart();
+                    int end = textComp.getSelectionEnd();
+                    String text = textComp.getText();
+                    
+                    String newText = text.substring(0, start) + item + text.substring(end);
+                    textComp.setText(newText);
+                    
+                    textComp.setCaretPosition(start + item.length());
+                    
+                    noUpdate = true;
+                    setValue(newText);
+                    noUpdate = false;
+                }
+            } finally {
+                processingSelection = false;
+                dropList.setSelectedIndex(0);
+            }
+            
+            nameField.requestFocusInWindow();
+            nameField.setCaretPosition(nameField.getCaretPosition());
+        }
+    }
+
+    /*
+     * Focus gained on text field, so enable insert drop-down
+     * and make sure it says 'Insert'
+     */
+    @Override
+    public void focusGained(FocusEvent e) {
+        if (e.getSource() == nameField && dropList != null) {
+            dropList.setSelectedIndex(0);
+            dropList.setEnabled(true);
+        }
+    }
+
+    /*
+     * Focus lost on text field, so disable insert drop-down
+     */
+    @Override
+    public void focusLost(FocusEvent e) {
+        if (e.getSource() == nameField && dropList != null && !dropList.isFocusOwner() && !processingSelection) {
+            dropList.setEnabled(false);
+        }
+    }
 }

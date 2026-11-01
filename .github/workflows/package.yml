@@ -1,8 +1,9 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ master, release-3.7 ]
+    branches: [ master, release-3.7, ccn-perf-3.8 ]
   pull_request:
     branches: [ master, release-3.7 ]
 
@@ -22,7 +23,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set branch
-        if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/release-3.7'
+        if: github.event_name == 'pull_request'
         # Checking out a detached head for PR means we have to set the branch
         # name for it to show up later; shallow checkout means the branch
         # won't exist yet so there's no conflict.
@@ -108,7 +109,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set branch
-        if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/release-3.7'
+        if: github.event_name == 'pull_request'
         # Checking out a detached head for PR means we have to set the branch
         # name for it to show up later; shallow checkout means the branch
         # won't exist yet so there's no conflict.
@@ -177,7 +178,7 @@ jobs:
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Set branch
-        if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/release-3.7'
+        if: github.event_name == 'pull_request'
         # Checking out a detached head for PR means we have to set the branch
         # name for it to show up later; shallow checkout means the branch
         # won't exist yet so there's no conflict.

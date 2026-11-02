@@ -257,6 +257,24 @@ public class DynamicProperty extends Decorator implements TranslatablePiece, Pro
     return ID + se.getValue();
   }
 
+  /**
+   * Is the given piece/trait a Dynamic Property that holds its own value on the piece?
+   * <p>
+   * {@link SetGlobalProperty} and {@link SetPieceProperty} extend DynamicProperty only to reuse its
+   * key-command machinery: they change a value held somewhere else, so code that is looking for the
+   * Dynamic Property holding a named value must skip them. Any other subclass (for example a custom
+   * trait supplied by a module) does hold its own value and must still be found, so callers should
+   * use this test rather than comparing the class exactly.
+   *
+   * @param p piece or trait to test
+   * @return true if p is a Dynamic Property that holds its own value
+   */
+  public static boolean isValueHolder(GamePiece p) {
+    return p instanceof DynamicProperty
+      && !(p instanceof SetGlobalProperty)
+      && !(p instanceof SetPieceProperty);
+  }
+
   @Override
   protected KeyCommand[] myGetKeyCommands() {
     return menuCommands;

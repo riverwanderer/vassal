@@ -34,6 +34,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -189,6 +191,48 @@ public class DynamicPropertyTest extends DecoratorTest {
       dp.setValue(beanShell);
 
       assertEquals("{}", dp.getValue());
+    }
+  }
+
+  @Test
+  public void testIsValueHolder() {
+    try (MockedStatic<GameModule> staticGm = Mockito.mockStatic(GameModule.class)) {
+      final GameModule gm = mock(GameModule.class);
+      staticGm.when(GameModule::getGameModule).thenReturn(gm);
+
+      final BasicPiece piece = new BasicPiece(BasicPiece.ID + ";;;");
+
+      // A plain Dynamic Property holds its own value
+      assertTrue(DynamicProperty.isValueHolder(new DynamicProperty(DynamicProperty.ID + "Strength", piece)));
+
+      // So does a subclass, e.g. a custom trait supplied by a module
+      assertTrue(DynamicProperty.isValueHolder(new DynamicProperty(DynamicProperty.ID + "Strength", piece) { }));
+
+      // Set Global Property and Set Piece Property extend DynamicProperty but hold no value of their own
+      assertFalse(DynamicProperty.isValueHolder(new SetGlobalProperty()));
+      assertFalse(DynamicProperty.isValueHolder(new SetPieceProperty()));
+
+      // Not a Dynamic Property at all
+      assertFalse(DynamicProperty.isValueHolder(piece));
+      assertFalse(DynamicProperty.isValueHolder(null));
+    }
+  }
+
+  @Test
+  public void testSetDynamicPropertyFindsSubclass() {
+    try (MockedStatic<GameModule> staticGm = Mockito.mockStatic(GameModule.class)) {
+      final GameModule gm = mock(GameModule.class);
+      staticGm.when(GameModule::getGameModule).thenReturn(gm);
+
+      // A module-supplied subclass of DynamicProperty must still be found and set by
+      // Decorator.setDynamicProperty (used by Place Marker and Global Key Command parameters)
+      final BasicPiece piece = new BasicPiece(BasicPiece.ID + ";;;");
+      final DynamicProperty dp = new DynamicProperty(DynamicProperty.ID + "Strength", piece) { };
+      dp.setValue("1");
+
+      Decorator.setDynamicProperty("Strength", "3", dp, dp, null, null);
+
+      assertEquals("3", dp.getValue());
     }
   }
 }

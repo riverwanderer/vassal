@@ -262,8 +262,8 @@ public class SetPieceProperty extends DynamicProperty implements RecursionLimite
     if (cancelled) return comm;
 
     while (p instanceof Decorator) {
-      // Compare class directly, not via instanceof as we need to exclude all subclasses
-      if (p.getClass() == DynamicProperty.class) {
+      // Skip Set Global Property / Set Piece Property, which extend DynamicProperty but hold no value
+      if (DynamicProperty.isValueHolder(p)) {
         final DynamicProperty currentDP = (DynamicProperty)p;
 
         if (propName.equals(currentDP.getKey())) {

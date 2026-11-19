@@ -201,8 +201,10 @@ public class ToolbarMenu extends AbstractToolbarItem
   protected void buildMenu() {
     for (final AbstractButton b : buttonsToMenuMap.keySet()) {
       b.removePropertyChangeListener(this);
-      b.setVisible(true);
-      b.putClientProperty(HIDDEN_BY_TOOLBAR, null);
+      if (b instanceof JButton) {
+        b.setVisible(true);
+        b.putClientProperty(HIDDEN_BY_TOOLBAR, null);
+      }
     }
     buttonsToMenuMap.clear();
     menu.removeAll();
@@ -234,19 +236,15 @@ public class ToolbarMenu extends AbstractToolbarItem
           // This button corresponds to another ToolbarMenu button.
           // Turn it into a submenu.
           final JPopupMenu toolbarMenu = (JPopupMenu) property;
+          toolbarMenu.removeContainerListener(this); // avoid piling up duplicate listeners on each rebuild
           toolbarMenu.addContainerListener(this);
           final JMenu subMenu = new JMenu(b.getText());
-          final Component[] items = toolbarMenu.getComponents();
-          for (final Component component : items) {
-            final JMenuItem otherItem = (JMenuItem) component;
-            final JMenuItem myItem =
-              new JMenuItem(otherItem.getText(), otherItem.getIcon());
-            myItem.addActionListener(e -> otherItem.doClick());
-            myItem.setEnabled(otherItem.isEnabled());
-            myItem.setToolTipText(otherItem.getToolTipText());
-            subMenu.add(myItem);
-            buttonsToMenuMap.put(otherItem, myItem);
+          for (final Component component : toolbarMenu.getComponents()) {
+            if (component instanceof JMenuItem) {
+              subMenu.add(mirrorMenuItem((JMenuItem) component));
+            }
           }
+          subMenu.setEnabled(b.isEnabled());
           buttonsToMenuMap.put(b, subMenu);
 
           final Object icon = b.getClientProperty(MENU_ICON_PROPERTY);
@@ -267,6 +265,35 @@ public class ToolbarMenu extends AbstractToolbarItem
         }
       }
     }
+  }
+
+  /**
+   * Make a copy of an item in a child ToolbarMenu's popup, recursing into
+   * any further-nested sub-menus, and listen to the original so that our
+   * copy tracks its enabled state, icon and text.
+   */
+  protected JMenuItem mirrorMenuItem(JMenuItem otherItem) {
+    final JMenuItem myItem;
+    if (otherItem instanceof JMenu) {
+      final JMenu otherMenu = (JMenu) otherItem;
+      final JMenu mySubMenu = new JMenu(otherMenu.getText());
+      mySubMenu.setIcon(otherMenu.getIcon());
+      for (final Component c : otherMenu.getMenuComponents()) {
+        if (c instanceof JMenuItem) {
+          mySubMenu.add(mirrorMenuItem((JMenuItem) c));
+        }
+      }
+      myItem = mySubMenu;
+    }
+    else {
+      myItem = new JMenuItem(otherItem.getText(), otherItem.getIcon());
+      myItem.addActionListener(e -> otherItem.doClick());
+    }
+    myItem.setEnabled(otherItem.isEnabled());
+    myItem.setToolTipText(otherItem.getToolTipText());
+    otherItem.addPropertyChangeListener(this);
+    buttonsToMenuMap.put(otherItem, myItem);
+    return myItem;
   }
 
   protected void scheduleBuildMenu() {
@@ -292,8 +319,8 @@ public class ToolbarMenu extends AbstractToolbarItem
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     super.propertyChange(evt);
-    if (evt.getSource() instanceof JButton) {
-      final JButton b = (JButton) evt.getSource();
+    if (evt.getSource() instanceof AbstractButton) { // JButton on our toolbar, or JMenuItem in a nested ToolbarMenu
+      final AbstractButton b = (AbstractButton) evt.getSource();
       final JMenuItem mi = buttonsToMenuMap.get(b);
       if (mi != null) {
         if (AbstractButton.TEXT_CHANGED_PROPERTY.equals(evt.getPropertyName())) {

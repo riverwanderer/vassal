@@ -258,13 +258,17 @@ public final class ModuleIcon {
     }
   }
 
-  /** Scales and crops the image to fill the tile, keeping its aspect ratio. */
+  /**
+   * Scales and crops the image to fill the tile, keeping its aspect ratio.
+   * A wide image is cropped equally at both sides. A tall one, such as a box
+   * cover, is cropped at the bottom only, as the title is usually at the top.
+   */
   private static void drawCover(Graphics2D g, BufferedImage img) {
     final double scale = Math.max(TILE / img.getWidth(), TILE / img.getHeight());
     final double w = img.getWidth() * scale;
     final double h = img.getHeight() * scale;
     final double x = TILE_INSET + (TILE - w) / 2;
-    final double y = TILE_INSET + (TILE - h) / 2;
+    final double y = TILE_INSET;
 
     // draw on a white ground, for images with transparency
     g.setColor(Color.WHITE);
@@ -475,9 +479,11 @@ public final class ModuleIcon {
 
   /** The VASSAL logo on a pale disc in the tile's bottom-right corner. */
   private static void drawBadge(Graphics2D g) {
-    final double r = ts(0.175);
-    final double cx = TILE_INSET + TILE - r * 0.95;
-    final double cy = TILE_INSET + TILE - r * 0.95;
+    final double r = ts(0.195);
+    // overhangs the tile, more below than to the right, to hide less of the
+    // picture; the icon's margin has room for it and its shadow
+    final double cx = TILE_INSET + TILE - r * 0.7;
+    final double cy = TILE_INSET + TILE - r * 0.55;
     final Shape disc = new Ellipse2D.Double(cx - r, cy - r, 2 * r, 2 * r);
 
     dropShadow(g, disc);

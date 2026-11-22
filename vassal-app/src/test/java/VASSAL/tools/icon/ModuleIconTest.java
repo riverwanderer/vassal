@@ -97,6 +97,31 @@ public class ModuleIconTest {
   }
 
   @Test
+  public void tallAboutImageKeepsItsTop() {
+    // like a box cover: a title band across the top tenth
+    final BufferedImage cover = new BufferedImage(300, 420, BufferedImage.TYPE_INT_RGB);
+    final Graphics2D g = cover.createGraphics();
+    g.setColor(Color.BLUE);
+    g.fillRect(0, 0, 300, 420);
+    g.setColor(Color.MAGENTA);
+    g.fillRect(0, 0, 300, 42);
+    g.dispose();
+
+    final BufferedImage icon = ModuleIcon.render("Anything", cover, SIZE, ModuleIcon.Badge.NONE);
+    // just inside the top of the tile, which starts 100/1024 of the way down
+    assertEquals(Color.MAGENTA, new Color(icon.getRGB(SIZE / 2, SIZE / 8)));
+  }
+
+  @Test
+  public void badgeIsNotClippedByTheIconEdge() {
+    final BufferedImage icon = ModuleIcon.render("Here I Stand", null, SIZE, ModuleIcon.Badge.VASSAL);
+    for (int i = 0; i < SIZE; ++i) {
+      assertEquals(0, icon.getRGB(SIZE - 1, i) >>> 24);
+      assertEquals(0, icon.getRGB(i, SIZE - 1) >>> 24);
+    }
+  }
+
+  @Test
   public void rendersAtAnySize() {
     final BufferedImage small = ModuleIcon.render("Here I Stand", null, 64, ModuleIcon.Badge.VASSAL);
     assertEquals(64, small.getWidth());

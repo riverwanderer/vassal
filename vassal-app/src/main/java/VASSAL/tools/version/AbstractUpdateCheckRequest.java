@@ -27,9 +27,21 @@ import VASSAL.Info;
  */
 public abstract class AbstractUpdateCheckRequest
                                       extends SwingWorker<Boolean, Void> {
+  private UpdateOffer offer;
+
   @Override
   protected Boolean doInBackground() throws IOException {
-    return !VersionUtils.isCurrent(Info.getVersion());
+    offer = UpdateOffer.find(Info.getVersion());
+    return offer != null;
+  }
+
+  /**
+   * @return the update to offer, or null if the running version is current
+   * or the check has not finished
+   * @since 3.8.3
+   */
+  protected UpdateOffer getOffer() {
+    return offer;
   }
 
   @Override

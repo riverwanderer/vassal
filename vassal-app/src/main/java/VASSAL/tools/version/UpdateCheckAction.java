@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import VASSAL.i18n.Resources;
-import VASSAL.tools.BrowserSupport;
 import VASSAL.tools.ErrorDialog;
 import VASSAL.tools.WarningDialog;
 
@@ -70,14 +69,7 @@ public class UpdateCheckAction extends AbstractAction {
         }
         else {
           // running version is obsolete
-          if (JOptionPane.showConfirmDialog(
-              frame,
-              Resources.getString("UpdateCheckAction.update_available_message"),
-              Resources.getString("UpdateCheckAction.update_available_title"),
-              JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-            BrowserSupport.openURL("https://vassalengine.org/download.html");
-          }
+          UpdatePrompt.show(frame, getOffer());
         }
         return;
       }

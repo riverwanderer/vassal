@@ -19,14 +19,12 @@ package VASSAL.launch;
 
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import VASSAL.i18n.Resources;
-import VASSAL.tools.BrowserSupport;
 import VASSAL.tools.version.AbstractUpdateCheckRequest;
+import VASSAL.tools.version.UpdatePrompt;
 
 /**
  * @since 3.1.0
@@ -43,14 +41,7 @@ public class UpdateCheckRequest extends AbstractUpdateCheckRequest {
       final Boolean update = get();
       if (update) {
         // running version is obsolete
-        if (JOptionPane.showConfirmDialog(
-            ModuleManagerWindow.getInstance(),
-            Resources.getString("UpdateCheckAction.update_available_message"),
-            Resources.getString("UpdateCheckAction.update_available_title"),
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-          BrowserSupport.openURL("https://vassalengine.org/download.html"); //NON-NLS
-        }
+        UpdatePrompt.show(ModuleManagerWindow.getInstance(), getOffer());
       }
     }
     catch (InterruptedException | ExecutionException e) {

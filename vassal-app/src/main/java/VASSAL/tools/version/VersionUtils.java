@@ -33,6 +33,10 @@ public class VersionUtils {
     vinfo = vi;
   }
 
+  static VersionInfo getVersionInfo() {
+    return vinfo;
+  }
+
   public static int compareReportable(String version) throws IOException {
     // a version is reportable if it is the current release or beta
     switch (signum(compareVersions(version, vinfo.getRelease()))) {

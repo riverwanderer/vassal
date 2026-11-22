@@ -479,14 +479,14 @@ public final class ModuleIcon {
 
   /** The VASSAL logo on a pale disc in the tile's bottom-right corner. */
   private static void drawBadge(Graphics2D g) {
-    final double r = ts(0.195);
-    // overhangs the tile, more below than to the right, to hide less of the
-    // picture; the icon's margin has room for it and its shadow
-    final double cx = TILE_INSET + TILE - r * 0.7;
-    final double cy = TILE_INSET + TILE - r * 0.55;
+    // sized and placed as macOS's alert badges are, but in the lower corner.
+    // They jut 0.135 of a tile vertically; the margin has room for 0.116,
+    // and no shadow.
+    final double r = ts(0.243);
+    final double cx = tx(1.108) - r;
+    final double cy = tx(1.116) - r;
     final Shape disc = new Ellipse2D.Double(cx - r, cy - r, 2 * r, 2 * r);
 
-    dropShadow(g, disc);
     g.setColor(new Color(0xEEF0EA));
     g.fill(disc);
     g.setColor(new Color(0, 0, 0, 50));

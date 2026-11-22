@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ main, release-3.9 ]
+    branches: [ main, release-3.9, mac-test-build ]
   pull_request:
     branches: [ main, release-3.9 ]
 

@@ -138,12 +138,12 @@ public class ModuleManagerMacOSXStartUp extends MacOSXStartUp {
 
     // Preselect the newest version the extension was built for or later;
     // extensions only warn when the module is older than that.
+    // A universal extension can go anywhere, but usually names its module.
+    final List<File> named = ext.isUniversal() ?
+      window.getModulesByName(moduleName == null ? "" : moduleName) : modules;
     final String builtFor = ext.getModuleVersion();
     File preferred = null;
     File newest = null;
-    // a universal extension still prefers the module it was built for
-    final List<File> named = ext.isUniversal() ?
-      window.getModulesByName(moduleName == null ? "" : moduleName) : modules;
     for (final File m : named) {
       final String v = window.getModuleVersion(m);
       if (newest == null ||
@@ -189,12 +189,27 @@ public class ModuleManagerMacOSXStartUp extends MacOSXStartUp {
       window, message,
       Resources.getString("ModuleManager.open_extension_title"), //NON-NLS
       JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-      null, options, addAndPlay);
+      null, options, add);
     if (answer != 0 && answer != 1) {
       return;
     }
 
     final File module = modules.get(Math.max(0, choice.getSelectedIndex()));
+    logger.info("Extension {}: {} chosen, answer {}", file, module, options[answer]); //NON-NLS
+
+    // a universal extension may be added to any module, but say so when
+    // it wasn't built for the one chosen
+    if (ext.isUniversal() && moduleName != null && !moduleName.isEmpty() &&
+        !named.contains(module) &&
+        JOptionPane.showConfirmDialog(
+          window,
+          Resources.getString("ModuleManager.open_extension_other_module", //NON-NLS
+            file.getName(), moduleName, module.getName()),
+          Resources.getString("ModuleManager.open_extension_title"), //NON-NLS
+          JOptionPane.OK_CANCEL_OPTION,
+          JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION) {
+      return;
+    }
 
     final File dir = window.getExtensionsDirectory(module);
     final File target = dir == null ? null : new File(dir, file.getName());

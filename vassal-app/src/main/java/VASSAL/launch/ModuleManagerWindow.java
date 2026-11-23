@@ -1068,6 +1068,7 @@ public class ModuleManagerWindow extends JFrame {
     }
 
     final Path target = dir.toPath().resolve(extension.getName());
+    logger.info("Adding {} to {}", extension, module); //NON-NLS
     if (!Files.exists(target) || !Files.isSameFile(extension.toPath(), target)) {
       Files.copy(extension.toPath(), target,
         java.nio.file.StandardCopyOption.REPLACE_EXISTING);

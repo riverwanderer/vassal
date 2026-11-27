@@ -42,6 +42,16 @@ The _General_ tab includes common preferences for configuring VASSAL's user inte
 +
 NOTE: This option is intended for debugging only and can degrade the performance of a module.
 
+[#DiscordStatus]
+*Show on my Discord status:*:: If the Discord desktop app is running on this computer, Vassal can show what you are playing on your Discord status, as "Playing Vassal". This setting applies to every module.
++
+* _Nothing_: Vassal never contacts Discord.
+* _The game only_: the module's name, and whether you are choosing a game, playing solo, playing online or reviewing a log.
+* _The game and the battle_ (the default): also the name of the save or log file you have open, and how many players are in your online room.
+* _Everything, including other players' names_: also the names of the other players in your online room.
++
+Your status is cleared when you close the module. If several modules are open, the status shows the one whose window you used most recently. Vassal never sends your password or anything else from your Personal preferences. Starting Vassal with `-DVASSAL.discord=false` turns the feature off completely.
+
 *Ask to ensure logging when starting or loading a new game:*:: If you are playing by email (PBEM), you will usually want to start a log file when you begin playing a new module or load a saved game, thus ensuring that you log all your actions into a .VLOG file which can be sent to your opponent. Checking this preference will provide a reminder prompt in these situations.
 
 *Ask to ensure logging after a replay:*:: Checking this option will produce a reminder prompt to start recording a logfile when you finish playing through a .VLOG replay, e.g., from your PBEM opponent.

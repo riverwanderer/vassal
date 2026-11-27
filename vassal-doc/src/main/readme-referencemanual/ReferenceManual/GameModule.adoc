@@ -33,6 +33,10 @@ Any of these properties is visible to the module itself as a <<GlobalProperties.
 
 image:images/GameModule.png[]
 
+*Module Library project ID:*:: The ID of this module's project in the https://vassalengine.org/library[Vassal Module Library]: the last part of the project page's address, as in `https://vassalengine.org/library/projects/<ID>`. Vassal builds library addresses from it, for example the _Get the module_ button on a player's Discord status. Leave blank if the module isn't in the library.
+
+*Discord status picture (https web address):*:: A picture to show on the Discord status of players using this module, such as the box cover. It must be a public `https://` web address of a PNG, JPEG or GIF; Discord shows it at about 120 pixels square. The picture on your Module Library project page is a good choice. If left blank, players' Discord status shows the Vassal logo. See <<Preferences.adoc#DiscordStatus,Discord status>>.
+
 === Editor Window
 The Editor window (shown below with the [Module] component highlighted) lists the module and all of its components. Right-click on the _[Module]_ to get a context menu with options for the many types of <<#SubComponents,Components>> you can add to a Vassal module, including <<Map.adoc#top,maps>>, <<ChartWindow.adoc#top,charts>>, and <<PieceWindow.adoc#top,palettes>> full of <<GamePiece.adoc#top,game pieces>>. See <<#SubComponents,below>> for more details.
 

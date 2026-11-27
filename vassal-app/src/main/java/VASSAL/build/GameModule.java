@@ -216,6 +216,10 @@ public class GameModule extends AbstractConfigurable
   public static final String MODULE_DESCRIPTION_PROPERTY = "ModuleDescription"; //NON-NLS
   public static final String MODULE_OTHER1_PROPERTY = "ModuleOther1"; //NON-NLS
   public static final String MODULE_OTHER2_PROPERTY = "ModuleOther2"; //NON-NLS
+  /** buildFile attribute: the module's project ID in the VASSAL Module Library (its slug) */
+  public static final String LIBRARY_PROJECT = "libraryProject"; //NON-NLS
+  /** buildFile attribute: https address of the picture for the player's Discord status */
+  public static final String DISCORD_IMAGE = "discordImage"; //NON-NLS
   public static final String MODULE_VASSAL_VERSION_CREATED_PROPERTY = "VassalVersionCreated"; //NON-NLS
   public static final String MODULE_VASSAL_VERSION_RUNNING_PROPERTY = "VassalVersionRunning"; //NON-NLS
   public static final String MODULE_CURRENT_LOCALE = "CurrentLanguage"; //NON-NLS
@@ -270,6 +274,8 @@ public class GameModule extends AbstractConfigurable
   private String vassalVersionCreated = "0.0";  //$NON-NLS-1$
   private String moduleOther1 = "";
   private String moduleOther2 = "";
+  private String libraryProjectId = "";
+  private String discordImage = "";
   private String gameName = DEFAULT_NAME;
   private String localizedGameName = null;
   private String description = "";
@@ -1059,6 +1065,12 @@ public class GameModule extends AbstractConfigurable
     else if (MODULE_OTHER2_PROPERTY.equals(name)) {
       moduleOther2 = (String) value;
     }
+    else if (LIBRARY_PROJECT.equals(name)) {
+      libraryProjectId = value == null ? "" : ((String) value).strip();
+    }
+    else if (DISCORD_IMAGE.equals(name)) {
+      discordImage = value == null ? "" : ((String) value).strip();
+    }
   }
 
   /**
@@ -1090,6 +1102,12 @@ public class GameModule extends AbstractConfigurable
     }
     else if (MODULE_OTHER2_PROPERTY.equals(name)) {
       return moduleOther2;
+    }
+    else if (LIBRARY_PROJECT.equals(name)) {
+      return libraryProjectId;
+    }
+    else if (DISCORD_IMAGE.equals(name)) {
+      return discordImage;
     }
     return null;
   }
@@ -1142,6 +1160,8 @@ public class GameModule extends AbstractConfigurable
       DESCRIPTION,
       MODULE_OTHER1_PROPERTY,
       MODULE_OTHER2_PROPERTY,
+      LIBRARY_PROJECT,
+      DISCORD_IMAGE,
       VASSAL_VERSION_CREATED,
       NEXT_PIECESLOT_ID,
     };
@@ -1160,7 +1180,9 @@ public class GameModule extends AbstractConfigurable
       Resources.getString("Editor.GameModule.version_label"), //$NON-NLS-1$
       Resources.getString("Editor.GameModule.description_label"),    //NON-NLS
       Resources.getString("Editor.GameModule.module_other_1_label"), //NON-NLS
-      Resources.getString("Editor.GameModule.module_other_2_label") //NON-NLS
+      Resources.getString("Editor.GameModule.module_other_2_label"), //NON-NLS
+      Resources.getString("Editor.GameModule.library_project_label"), //NON-NLS
+      Resources.getString("Editor.GameModule.discord_image_label") //NON-NLS
     };
   }
 
@@ -1175,6 +1197,8 @@ public class GameModule extends AbstractConfigurable
   @Override
   public Class<?>[] getAttributeTypes() {
     return new Class<?>[]{
+      String.class,
+      String.class,
       String.class,
       String.class,
       String.class,
@@ -1309,6 +1333,21 @@ public class GameModule extends AbstractConfigurable
    */
   public String getLocalizedGameName() {
     return localizedGameName == null ? gameName : localizedGameName;
+  }
+
+  /**
+   * @return the module's project ID in the VASSAL Module Library, or "" if not set
+   * @see VASSAL.tools.library.LibraryProject
+   */
+  public String getLibraryProjectId() {
+    return libraryProjectId;
+  }
+
+  /**
+   * @return the https address of the picture to show on the player's Discord status, or "" for the VASSAL logo
+   */
+  public String getDiscordImage() {
+    return discordImage;
   }
 
   /**
